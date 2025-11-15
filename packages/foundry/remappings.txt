@@ -1,2 +1,3 @@
 @openzeppelin/contracts/=lib/openzeppelin-contracts/contracts
-  
+boring-vault/=lib/boring-vault/src/
+forge-std/=lib/forge-std/src/

@@ -1,4 +1,7 @@
 {
+  "lib/boring-vault": {
+    "rev": "0e23e7fd3a9a7735bd3fea61dd33c1700e75c528"
+  },
   "lib/forge-std": {
     "tag": {
       "name": "v1.11.0",
