@@ -20,7 +20,7 @@ contract StrategyManager is Auth {
     using SafeERC20 for IERC20;
 
     /// @notice The SuperYieldVault that this manager controls
-    address public immutable vault;
+    address public immutable VAULT;
 
     /// @notice GlueX vault addresses (from hackathon requirements)
     address[5] public glueXVaults = [
@@ -62,7 +62,7 @@ contract StrategyManager is Auth {
         Authority _authority,
         address _vault
     ) Auth(_owner, _authority) {
-        vault = _vault;
+        VAULT = _vault;
 
         // Whitelist all GlueX vaults
         for (uint256 i = 0; i < glueXVaults.length; i++) {
@@ -88,7 +88,7 @@ contract StrategyManager is Auth {
         }
 
         // Transfer asset from vault to this contract
-        IERC20(asset).safeTransferFrom(vault, address(this), amount);
+        IERC20(asset).safeTransferFrom(VAULT, address(this), amount);
 
         // Approve the GlueX vault to spend the asset
         IERC20(asset).approve(targetVault, amount);
@@ -96,7 +96,7 @@ contract StrategyManager is Auth {
         // Deposit into GlueX vault
         // Note: GlueX vaults use standard ERC4626 deposit interface
         (bool success, ) = targetVault.call(
-            abi.encodeWithSignature("deposit(uint256,address)", amount, vault)
+            abi.encodeWithSignature("deposit(uint256,address)", amount, VAULT)
         );
 
         if (!success) {
@@ -133,7 +133,7 @@ contract StrategyManager is Auth {
         // Withdraw from GlueX vault
         // Note: GlueX vaults use standard ERC4626 withdraw interface
         (bool success, ) = targetVault.call(
-            abi.encodeWithSignature("withdraw(uint256,address,address)", amount, vault, vault)
+            abi.encodeWithSignature("withdraw(uint256,address,address)", amount, VAULT, VAULT)
         );
 
         if (!success) {

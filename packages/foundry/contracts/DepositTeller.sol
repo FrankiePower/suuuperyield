@@ -38,7 +38,7 @@ contract DepositTeller is Auth {
     using SafeERC20 for IERC20;
 
     /// @notice The SuperYieldVault that this teller services
-    address public immutable vault;
+    address public immutable VAULT;
 
     /// @notice The accountant contract that tracks share pricing
     address public accountant;
@@ -75,7 +75,7 @@ contract DepositTeller is Auth {
         address _vault,
         address _accountant
     ) Auth(_owner, _authority) {
-        vault = _vault;
+        VAULT = _vault;
         accountant = _accountant;
     }
 
@@ -95,13 +95,13 @@ contract DepositTeller is Auth {
         }
 
         // Transfer asset from user to vault
-        IERC20(asset).safeTransferFrom(msg.sender, vault, amount);
+        IERC20(asset).safeTransferFrom(msg.sender, VAULT, amount);
 
         // Calculate shares to mint (1:1 for now, will use accountant later)
         shares = amount;
 
         // Mint shares to user via vault's enter function
-        ISuperYieldVault(vault).enter(
+        ISuperYieldVault(VAULT).enter(
             msg.sender,
             asset,
             amount,
@@ -127,7 +127,7 @@ contract DepositTeller is Auth {
         assetAmount = shareAmount;
 
         // Burn shares and withdraw assets via vault's exit function
-        ISuperYieldVault(vault).exit(
+        ISuperYieldVault(VAULT).exit(
             msg.sender,
             asset,
             assetAmount,

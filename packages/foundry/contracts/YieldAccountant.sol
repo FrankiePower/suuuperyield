@@ -16,7 +16,7 @@ import {Auth, Authority} from "solmate/auth/Auth.sol";
  */
 contract YieldAccountant is Auth {
     /// @notice The SuperYieldVault this accountant services
-    address public immutable vault;
+    address public immutable VAULT;
 
     /// @notice Base for all calculations (1e18)
     uint256 public constant BASE = 1e18;
@@ -31,7 +31,7 @@ contract YieldAccountant is Auth {
     uint256 public totalYieldGenerated;
 
     /// @notice Decimals for the base asset
-    uint8 public immutable decimals;
+    uint8 public immutable DECIMALS;
 
     /// @notice Events
     event ExchangeRateUpdated(uint256 newRate, uint256 timestamp);
@@ -55,8 +55,8 @@ contract YieldAccountant is Auth {
         address _vault,
         uint8 _decimals
     ) Auth(_owner, _authority) {
-        vault = _vault;
-        decimals = _decimals;
+        VAULT = _vault;
+        DECIMALS = _decimals;
         exchangeRate = BASE; // Start at 1:1
         lastUpdateTime = block.timestamp;
     }
@@ -133,7 +133,7 @@ contract YieldAccountant is Auth {
      * @dev Simplified APY calculation for demo purposes
      * @return apy The current APY (scaled by 100, e.g., 500 = 5.00%)
      */
-    function getCurrentAPY() external view returns (uint256 apy) {
+    function getApy() external view returns (uint256 apy) {
         // Simple implementation: if rate > BASE, calculate annualized return
         if (exchangeRate <= BASE || lastUpdateTime == 0) {
             return 0;
