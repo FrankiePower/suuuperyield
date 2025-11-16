@@ -47,6 +47,15 @@ const SuperYield: NextPage = () => {
     functionName: "name",
   });
 
+  // Debug logging
+  React.useEffect(() => {
+    console.log("Contract read values:", {
+      vaultBalance: vaultBalance?.toString(),
+      totalAssets: totalAssets?.toString(),
+      vaultName,
+    });
+  }, [vaultBalance, totalAssets, vaultName]);
+
   // Write contract for deposits
   const { writeContractAsync: depositToVault } = useScaffoldWriteContract("DepositTeller");
 
@@ -356,9 +365,10 @@ const SuperYield: NextPage = () => {
     }
   };
 
-  const formatAmount = (value: bigint | undefined) => {
+  const formatAmount = (value: bigint | undefined, decimals: number = 6) => {
     if (!value) return "0.00";
-    const formatted = Number(value) / 1e18;
+    const divisor = Math.pow(10, decimals);
+    const formatted = Number(value) / divisor;
     return formatted.toFixed(4);
   };
 
@@ -397,13 +407,13 @@ const SuperYield: NextPage = () => {
               <div className="bg-white rounded-xl p-4 shadow-lg border-2" style={{ borderColor: "#36a2d8" }}>
                 <div className="text-sm text-gray-600 font-medium mb-1">Your Vault Balance</div>
                 <div className="text-2xl font-bold" style={{ color: "#36a2d8" }}>
-                  {formatAmount(vaultBalance as bigint)} shares
+                  {formatAmount(vaultBalance as bigint, 18)} shares
                 </div>
               </div>
               <div className="bg-white rounded-xl p-4 shadow-lg border-2" style={{ borderColor: "#ce58a1" }}>
                 <div className="text-sm text-gray-600 font-medium mb-1">Total Vault Assets</div>
                 <div className="text-2xl font-bold" style={{ color: "#ce58a1" }}>
-                  {formatAmount(totalAssets as bigint)} USDC
+                  {formatAmount(totalAssets as bigint, 18)} shares
                 </div>
               </div>
               <div className="bg-white rounded-xl p-4 shadow-lg border-2" style={{ borderColor: "#36a2d8" }}>
