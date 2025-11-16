@@ -1,6 +1,5 @@
-import { hyperEVM, hyperEVMTestnet } from "./utils/chains";
-import * as chains from "viem/chains";
 import { hyperEvmMainnet } from "./utils/chains";
+import * as chains from "viem/chains";
 
 export type BaseConfig = {
   targetNetworks: readonly chains.Chain[];
