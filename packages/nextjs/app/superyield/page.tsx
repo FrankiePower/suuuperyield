@@ -27,6 +27,7 @@ const SuperYield: NextPage = () => {
   const [depositAmount, setDepositAmount] = useState("100");
   const [depositLoading, setDepositLoading] = useState(false);
   const [depositSuccess, setDepositSuccess] = useState(false);
+  const [executingStrategy, setExecutingStrategy] = useState(false);
 
   // Read vault balance for connected user
   const { data: vaultBalance } = useScaffoldReadContract({
@@ -58,6 +59,9 @@ const SuperYield: NextPage = () => {
 
   // Write contract for deposits
   const { writeContractAsync: depositToVault } = useScaffoldWriteContract("DepositTeller");
+
+  // Write contract for strategy execution
+  const { writeContractAsync: executeStrategy } = useScaffoldWriteContract("StrategyManager");
 
   const loadYieldData = useCallback(async () => {
     try {
@@ -365,6 +369,45 @@ const SuperYield: NextPage = () => {
     }
   };
 
+  const handleExecuteStrategy = async () => {
+    if (!isConnected || !address || !aiDecision) {
+      alert("Please connect your wallet and run optimization first");
+      return;
+    }
+
+    setExecutingStrategy(true);
+
+    try {
+      // USDC address on HyperEVM
+      const usdcAddress = "0xb88339cb7199b77e23db6e890353e22632ba630f" as `0x${string}`;
+
+      // Convert amount to proper format (6 decimals for USDC)
+      const amountInUSDC = BigInt(Math.floor(parseFloat(aiDecision.amount) * 1_000_000));
+
+      console.log("Executing allocation strategy:", {
+        targetVault: aiDecision.targetVault,
+        asset: usdcAddress,
+        amount: amountInUSDC.toString(),
+      });
+
+      await executeStrategy({
+        functionName: "allocate",
+        args: [aiDecision.targetVault as `0x${string}`, usdcAddress, amountInUSDC],
+      });
+
+      alert(`Strategy executed successfully! Allocated ${aiDecision.amount} USDC to ${aiDecision.targetProtocol}`);
+
+      // Clear the AI decision after successful execution
+      setAiDecision(null);
+    } catch (error) {
+      console.error("Strategy execution failed:", error);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      alert(`Strategy execution failed: ${errorMessage}`);
+    } finally {
+      setExecutingStrategy(false);
+    }
+  };
+
   const formatAmount = (value: bigint | undefined, decimals: number = 6) => {
     if (!value) return "0.00";
     const divisor = Math.pow(10, decimals);
@@ -610,13 +653,17 @@ const SuperYield: NextPage = () => {
                     Dismiss
                   </button>
                   <button
-                    className="flex-1 py-3 px-6 rounded-xl font-bold text-white transition-all hover:scale-105"
+                    onClick={handleExecuteStrategy}
+                    disabled={executingStrategy || !isConnected}
+                    className={`flex-1 py-3 px-6 rounded-xl font-bold text-white transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${executingStrategy ? "animate-pulse" : ""}`}
                     style={{
-                      background: "linear-gradient(135deg, #ce58a1 0%, #d665ab 100%)",
+                      background: executingStrategy
+                        ? "linear-gradient(135deg, #ce58a1 0%, #b64d8f 100%)"
+                        : "linear-gradient(135deg, #ce58a1 0%, #d665ab 100%)",
                       boxShadow: "0 4px 20px rgba(206, 88, 161, 0.4)",
                     }}
                   >
-                    Execute Strategy
+                    {executingStrategy ? "🔄 Executing..." : "⚡ Execute Strategy"}
                   </button>
                 </div>
               </div>
