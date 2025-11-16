@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
-import { waitForTransactionReceipt, writeContract } from "wagmi/actions";
+import { readContract, waitForTransactionReceipt, writeContract } from "wagmi/actions";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import type { AllocationDecision } from "~~/lib/ai/openai-agent";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
@@ -125,22 +125,59 @@ const SuperYield: NextPage = () => {
       const usdcAddress = "0xb88339cb7199b77e23db6e890353e22632ba630f" as `0x${string}`;
       const depositTellerAddress = "0x2f245E60EE78Acb2847D8FE1336725307C7B38Df" as `0x${string}`;
 
+      // Define ERC20 ABI for balance and allowance checks
+      const erc20Abi = [
+        {
+          name: "balanceOf",
+          type: "function",
+          stateMutability: "view",
+          inputs: [{ name: "account", type: "address" }],
+          outputs: [{ name: "", type: "uint256" }],
+        },
+        {
+          name: "allowance",
+          type: "function",
+          stateMutability: "view",
+          inputs: [
+            { name: "owner", type: "address" },
+            { name: "spender", type: "address" },
+          ],
+          outputs: [{ name: "", type: "uint256" }],
+        },
+        {
+          name: "approve",
+          type: "function",
+          stateMutability: "nonpayable",
+          inputs: [
+            { name: "spender", type: "address" },
+            { name: "amount", type: "uint256" },
+          ],
+          outputs: [{ name: "", type: "bool" }],
+        },
+      ];
+
+      // Check USDC balance
+      console.log("Checking USDC balance...");
+      const usdcBalance = (await readContract(wagmiConfig, {
+        address: usdcAddress,
+        abi: erc20Abi,
+        functionName: "balanceOf",
+        args: [address],
+      })) as bigint;
+
+      console.log(`USDC balance: ${usdcBalance} (need: ${amountInUSDC})`);
+
+      if (usdcBalance < amountInUSDC) {
+        throw new Error(
+          `Insufficient USDC balance. You have ${Number(usdcBalance) / 1_000_000} USDC, but need ${depositAmount} USDC`,
+        );
+      }
+
       // Step 1: Approve USDC spending by DepositTeller
       console.log(`Approving ${amountInUSDC} USDC spending by ${depositTellerAddress}...`);
       const approveTxHash = await writeContract(wagmiConfig, {
         address: usdcAddress,
-        abi: [
-          {
-            name: "approve",
-            type: "function",
-            stateMutability: "nonpayable",
-            inputs: [
-              { name: "spender", type: "address" },
-              { name: "amount", type: "uint256" },
-            ],
-            outputs: [{ name: "", type: "bool" }],
-          },
-        ],
+        abi: erc20Abi,
         functionName: "approve",
         args: [depositTellerAddress, amountInUSDC],
       });
@@ -157,6 +194,21 @@ const SuperYield: NextPage = () => {
 
       if (approvalReceipt.status !== "success") {
         throw new Error("Approval transaction failed");
+      }
+
+      // Verify the allowance was set correctly
+      console.log("Verifying allowance...");
+      const allowance = (await readContract(wagmiConfig, {
+        address: usdcAddress,
+        abi: erc20Abi,
+        functionName: "allowance",
+        args: [address, depositTellerAddress],
+      })) as bigint;
+
+      console.log(`Current allowance: ${allowance} (need: ${amountInUSDC})`);
+
+      if (allowance < amountInUSDC) {
+        throw new Error(`Allowance verification failed. Current allowance: ${allowance}, needed: ${amountInUSDC}`);
       }
 
       console.log("USDC approved successfully, now depositing...");
