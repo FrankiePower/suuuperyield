@@ -128,6 +128,20 @@ const SuperYield: NextPage = () => {
       // Define ERC20 ABI for balance and allowance checks
       const erc20Abi = [
         {
+          name: "symbol",
+          type: "function",
+          stateMutability: "view",
+          inputs: [],
+          outputs: [{ name: "", type: "string" }],
+        },
+        {
+          name: "decimals",
+          type: "function",
+          stateMutability: "view",
+          inputs: [],
+          outputs: [{ name: "", type: "uint8" }],
+        },
+        {
           name: "balanceOf",
           type: "function",
           stateMutability: "view",
@@ -155,6 +169,27 @@ const SuperYield: NextPage = () => {
           outputs: [{ name: "", type: "bool" }],
         },
       ];
+
+      // Verify USDC contract
+      console.log("Verifying USDC contract...");
+      try {
+        const symbol = (await readContract(wagmiConfig, {
+          address: usdcAddress,
+          abi: erc20Abi,
+          functionName: "symbol",
+        })) as string;
+
+        const decimals = (await readContract(wagmiConfig, {
+          address: usdcAddress,
+          abi: erc20Abi,
+          functionName: "decimals",
+        })) as number;
+
+        console.log(`Token verified: ${symbol} with ${decimals} decimals`);
+      } catch (error) {
+        console.error("Failed to verify USDC contract:", error);
+        throw new Error(`Invalid USDC contract address: ${usdcAddress}`);
+      }
 
       // Check USDC balance
       console.log("Checking USDC balance...");
@@ -211,7 +246,58 @@ const SuperYield: NextPage = () => {
         throw new Error(`Allowance verification failed. Current allowance: ${allowance}, needed: ${amountInUSDC}`);
       }
 
-      console.log("USDC approved successfully, now depositing...");
+      console.log("USDC approved successfully, now checking DepositTeller requirements...");
+
+      // Check if USDC is supported by DepositTeller
+      const depositTellerAbi = [
+        {
+          name: "isAssetSupported",
+          type: "function",
+          stateMutability: "view",
+          inputs: [{ name: "asset", type: "address" }],
+          outputs: [{ name: "", type: "bool" }],
+        },
+        {
+          name: "minimumDeposit",
+          type: "function",
+          stateMutability: "view",
+          inputs: [{ name: "asset", type: "address" }],
+          outputs: [{ name: "", type: "uint256" }],
+        },
+      ];
+
+      const isSupported = (await readContract(wagmiConfig, {
+        address: depositTellerAddress,
+        abi: depositTellerAbi,
+        functionName: "isAssetSupported",
+        args: [usdcAddress],
+      })) as boolean;
+
+      console.log(`USDC supported by DepositTeller: ${isSupported}`);
+
+      if (!isSupported) {
+        throw new Error(
+          `USDC is not supported by the DepositTeller contract. The asset needs to be added by the contract owner.`,
+        );
+      }
+
+      const minimumDeposit = (await readContract(wagmiConfig, {
+        address: depositTellerAddress,
+        abi: depositTellerAbi,
+        functionName: "minimumDeposit",
+        args: [usdcAddress],
+      })) as bigint;
+
+      console.log(`Minimum deposit required: ${minimumDeposit} (depositing: ${amountInUSDC})`);
+
+      if (amountInUSDC < minimumDeposit) {
+        throw new Error(`Deposit amount ${amountInUSDC} is below minimum required: ${minimumDeposit}`);
+      }
+
+      console.log("All DepositTeller requirements met, now depositing...");
+      console.log(
+        `Deposit parameters: asset=${usdcAddress}, amount=${amountInUSDC}, depositTeller=${depositTellerAddress}`,
+      );
 
       // Step 2: Deposit to vault
       await depositToVault({
