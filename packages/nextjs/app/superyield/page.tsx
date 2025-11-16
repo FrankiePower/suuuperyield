@@ -407,13 +407,13 @@ const SuperYield: NextPage = () => {
               <div className="bg-white rounded-xl p-4 shadow-lg border-2" style={{ borderColor: "#36a2d8" }}>
                 <div className="text-sm text-gray-600 font-medium mb-1">Your Vault Balance</div>
                 <div className="text-2xl font-bold" style={{ color: "#36a2d8" }}>
-                  {formatAmount(vaultBalance as bigint, 18)} shares
+                  {formatAmount(vaultBalance as bigint, 6)} shares
                 </div>
               </div>
               <div className="bg-white rounded-xl p-4 shadow-lg border-2" style={{ borderColor: "#ce58a1" }}>
                 <div className="text-sm text-gray-600 font-medium mb-1">Total Vault Assets</div>
                 <div className="text-2xl font-bold" style={{ color: "#ce58a1" }}>
-                  {formatAmount(totalAssets as bigint, 18)} shares
+                  {formatAmount(totalAssets as bigint, 6)} USDC
                 </div>
               </div>
               <div className="bg-white rounded-xl p-4 shadow-lg border-2" style={{ borderColor: "#36a2d8" }}>
