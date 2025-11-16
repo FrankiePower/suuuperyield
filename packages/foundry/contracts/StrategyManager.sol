@@ -87,13 +87,9 @@ contract StrategyManager is Auth {
 
         // Deposit into GlueX vault
         // Note: GlueX vaults use standard ERC4626 deposit interface
-<<<<<<< HEAD
         (bool success, ) = targetVault.call(
             abi.encodeWithSignature("deposit(uint256,address)", amount, VAULT)
         );
-=======
-        (bool success,) = targetVault.call(abi.encodeWithSignature("deposit(uint256,address)", amount, vault));
->>>>>>> 4dd450c (djfksjdf)
 
         if (!success) {
             revert AllocationFailed(targetVault, "Deposit failed");
@@ -124,14 +120,9 @@ contract StrategyManager is Auth {
 
         // Withdraw from GlueX vault
         // Note: GlueX vaults use standard ERC4626 withdraw interface
-<<<<<<< HEAD
         (bool success, ) = targetVault.call(
             abi.encodeWithSignature("withdraw(uint256,address,address)", amount, VAULT, VAULT)
         );
-=======
-        (bool success,) =
-            targetVault.call(abi.encodeWithSignature("withdraw(uint256,address,address)", amount, vault, vault));
->>>>>>> 4dd450c (djfksjdf)
 
         if (!success) {
             revert AllocationFailed(targetVault, "Withdrawal failed");
