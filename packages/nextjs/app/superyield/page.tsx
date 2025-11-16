@@ -50,157 +50,199 @@ const SuperYield: NextPage = () => {
   };
 
   return (
-    <>
-      <div className="flex items-center flex-col grow pt-10">
-        <div className="px-5">
-          <h1 className="text-center">
-            <span className="block text-4xl font-bold">SuperYield</span>
-            <span className="block text-lg">AI-Powered Yield Optimizer</span>
+    <div className="min-h-screen" style={{ background: "linear-gradient(135deg, #ffecd0 0%, #f8e4c4 100%)" }}>
+      {/* Hero Section */}
+      <div className="px-5 py-16 text-center">
+        <div className="mb-8">
+          <h1 className="text-6xl font-bold mb-4">
+            <span
+              className="bg-gradient-to-r from-blue-600 to-pink-600 bg-clip-text text-transparent"
+              style={{
+                background: "linear-gradient(135deg, #36a2d8 0%, #ce58a1 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              SuperYield
+            </span>
           </h1>
-          <p className="text-center text-lg mt-4">Using GlueX APIs & BoringVault for secure asset custody</p>
-
-          {!isConnected && (
-            <div className="alert alert-warning mt-4">
-              <span>Connect your wallet to start optimizing yields</span>
-            </div>
-          )}
+          <p className="text-xl text-gray-700 font-medium">AI-Powered Yield Optimizer</p>
+          <p className="text-lg text-gray-600 mt-2">Using GlueX APIs & BoringVault for secure asset custody</p>
         </div>
 
-        <div className="grow bg-base-300 w-full mt-16 px-8 py-12">
-          <div className="max-w-6xl mx-auto space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <h2 className="card-title">Yield Optimization</h2>
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text">Deposit Amount (ETH)</span>
-                    </label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      min="0"
-                      value={depositAmount}
-                      onChange={e => setDepositAmount(e.target.value)}
-                      className="input input-bordered"
-                    />
-                  </div>
-                  <div className="card-actions justify-end">
-                    <button
-                      className={`btn btn-primary ${loading ? "loading" : ""}`}
-                      onClick={runOptimization}
-                      disabled={!isConnected || loading}
-                    >
-                      Optimize Yield
-                    </button>
-                  </div>
-                </div>
-              </div>
+        {!isConnected && (
+          <div
+            className="inline-flex items-center px-6 py-3 rounded-full font-medium shadow-lg"
+            style={{ backgroundColor: "#ce58a1", color: "white" }}
+          >
+            <span className="mr-2">⚠️</span>
+            Connect your wallet to start optimizing yields
+          </div>
+        )}
+      </div>
 
-              <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <h2 className="card-title">Hackathon Requirements ✅</h2>
-                  <ul className="space-y-2">
-                    <li className="flex items-center gap-2">
-                      <span className="text-green-500">✅</span>
-                      ERC-7540/BoringVault for asset custody
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-green-500">✅</span>
-                      GlueX Yields API for yield identification
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-green-500">✅</span>
-                      GlueX Router API for asset reallocation
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-green-500">✅</span>
-                      GlueX Vaults in whitelisted set
-                    </li>
-                  </ul>
+      {/* Main Content */}
+      <div className="px-8 pb-12">
+        <div className="max-w-6xl mx-auto space-y-8">
+          {/* Yield Optimization Card */}
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-xl border-2" style={{ borderColor: "#36a2d8" }}>
+              <div
+                className="px-6 py-4 rounded-t-2xl text-white font-bold text-xl"
+                style={{ background: "linear-gradient(135deg, #36a2d8 0%, #2e8bc0 100%)" }}
+              >
+                🚀 Yield Optimization
+              </div>
+              <div className="p-6">
+                <div className="mb-6">
+                  <label className="block text-gray-700 font-medium mb-2">Deposit Amount (ETH)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="0"
+                    value={depositAmount}
+                    onChange={e => setDepositAmount(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border-2 transition-all focus:outline-none"
+                    style={{
+                      borderColor: "#36a2d8",
+                      background: "#ffecd0",
+                    }}
+                  />
+                </div>
+                <button
+                  onClick={runOptimization}
+                  disabled={!isConnected || loading}
+                  className={`w-full py-4 px-6 rounded-xl font-bold text-white transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed ${loading ? "animate-pulse" : ""}`}
+                  style={{
+                    background: loading
+                      ? "linear-gradient(135deg, #ce58a1 0%, #b64d8f 100%)"
+                      : "linear-gradient(135deg, #ce58a1 0%, #d665ab 100%)",
+                    boxShadow: "0 4px 20px rgba(206, 88, 161, 0.4)",
+                  }}
+                >
+                  {loading ? "🔄 Optimizing..." : "✨ Optimize Yield"}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Optimization Results */}
+          {optimization && (
+            <div className="bg-white rounded-2xl shadow-xl border-2" style={{ borderColor: "#36a2d8" }}>
+              <div
+                className="px-6 py-4 rounded-t-2xl text-white font-bold text-xl"
+                style={{ background: "linear-gradient(135deg, #36a2d8 0%, #2e8bc0 100%)" }}
+              >
+                📊 Optimization Results
+              </div>
+              <div className="p-6">
+                <div
+                  className="p-4 rounded-xl mb-6 border-l-4"
+                  style={{
+                    backgroundColor: "#ffecd0",
+                    borderLeftColor: "#ce58a1",
+                  }}
+                >
+                  <p className="text-gray-700 font-medium">{optimization.reasoning}</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center p-4 rounded-xl" style={{ backgroundColor: "#ffecd0" }}>
+                    <div className="text-sm text-gray-600 font-medium mb-1">Current Yield</div>
+                    <div className="text-3xl font-bold" style={{ color: "#36a2d8" }}>
+                      {optimization.currentYield.toFixed(2)}%
+                    </div>
+                  </div>
+
+                  <div className="text-center p-4 rounded-xl" style={{ backgroundColor: "#ffecd0" }}>
+                    <div className="text-sm text-gray-600 font-medium mb-1">Best GlueX Opportunity</div>
+                    <div className="text-3xl font-bold" style={{ color: "#ce58a1" }}>
+                      {optimization.projectedYield.toFixed(2)}%
+                    </div>
+                    <div className="text-sm text-gray-500">{optimization.bestOpportunity.protocol}</div>
+                  </div>
+
+                  <div className="text-center p-4 rounded-xl" style={{ backgroundColor: "#ffecd0" }}>
+                    <div className="text-sm text-gray-600 font-medium mb-1">Improvement</div>
+                    <div
+                      className="text-3xl font-bold"
+                      style={{ color: optimization.reallocationNeeded ? "#ce58a1" : "#36a2d8" }}
+                    >
+                      +{(optimization.projectedYield - optimization.currentYield).toFixed(2)}%
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+          )}
 
-            {optimization && (
-              <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <h2 className="card-title">Optimization Results</h2>
-                  <div className="alert alert-info">
-                    <span>{optimization.reasoning}</span>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="stat">
-                      <div className="stat-title">Current Yield</div>
-                      <div className="stat-value">{optimization.currentYield.toFixed(2)}%</div>
-                    </div>
-                    <div className="stat">
-                      <div className="stat-title">Best GlueX Opportunity</div>
-                      <div className="stat-value text-success">{optimization.projectedYield.toFixed(2)}%</div>
-                      <div className="stat-desc">{optimization.bestOpportunity.protocol}</div>
-                    </div>
-                    <div className="stat">
-                      <div className="stat-title">Improvement</div>
-                      <div
-                        className={`stat-value ${optimization.reallocationNeeded ? "text-success" : "text-base-content"}`}
-                      >
-                        +{(optimization.projectedYield - optimization.currentYield).toFixed(2)}%
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="card bg-base-100 shadow-xl">
-              <div className="card-body">
-                <h2 className="card-title">Available GlueX Yield Opportunities</h2>
-                <div className="overflow-x-auto">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Protocol</th>
-                        <th>APY</th>
-                        <th>TVL</th>
-                        <th>Risk</th>
-                        <th>Type</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {yields
-                        .filter(y => y.isGlueXVault)
-                        .map((yieldOpp, index) => (
-                          <tr key={yieldOpp.id || index} className="bg-primary/10">
-                            <td className="font-medium">{yieldOpp.protocol}</td>
-                            <td className="text-success font-bold">{yieldOpp.apy.toFixed(2)}%</td>
-                            <td>${yieldOpp.tvl.toLocaleString()}</td>
-                            <td>
-                              <div
-                                className={`badge ${
+          {/* Yield Opportunities Table */}
+          <div className="bg-white rounded-2xl shadow-xl border-2" style={{ borderColor: "#ce58a1" }}>
+            <div
+              className="px-6 py-4 rounded-t-2xl text-white font-bold text-xl"
+              style={{ background: "linear-gradient(135deg, #ce58a1 0%, #b64d8f 100%)" }}
+            >
+              💎 Available GlueX Yield Opportunities
+            </div>
+            <div className="p-6">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b-2" style={{ borderColor: "#ffecd0" }}>
+                      {["Protocol", "APY", "TVL", "Risk", "Type"].map(header => (
+                        <th key={header} className="px-4 py-3 text-left font-bold text-gray-700">
+                          {header}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {yields
+                      .filter(y => y.isGlueXVault)
+                      .map((yieldOpp, index) => (
+                        <tr
+                          key={yieldOpp.id || index}
+                          className="hover:scale-[1.02] transition-transform"
+                          style={{ backgroundColor: index % 2 === 0 ? "#ffecd0" : "#f8e4c4" }}
+                        >
+                          <td className="px-4 py-4 font-bold text-gray-800">{yieldOpp.protocol}</td>
+                          <td className="px-4 py-4 font-bold text-2xl" style={{ color: "#ce58a1" }}>
+                            {yieldOpp.apy.toFixed(2)}%
+                          </td>
+                          <td className="px-4 py-4 font-medium text-gray-700">${yieldOpp.tvl.toLocaleString()}</td>
+                          <td className="px-4 py-4">
+                            <span
+                              className="px-3 py-1 rounded-full text-white font-medium"
+                              style={{
+                                backgroundColor:
                                   yieldOpp.risk === "low"
-                                    ? "badge-success"
+                                    ? "#10b981"
                                     : yieldOpp.risk === "medium"
-                                      ? "badge-warning"
-                                      : "badge-error"
-                                }`}
-                              >
-                                {yieldOpp.risk}
-                              </div>
-                            </td>
-                            <td>
-                              <div className="badge badge-primary">GlueX Vault</div>
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
-                </div>
+                                      ? "#f59e0b"
+                                      : "#ef4444",
+                              }}
+                            >
+                              {yieldOpp.risk}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span
+                              className="px-3 py-1 rounded-full text-white font-medium"
+                              style={{ backgroundColor: "#36a2d8" }}
+                            >
+                              GlueX Vault
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
