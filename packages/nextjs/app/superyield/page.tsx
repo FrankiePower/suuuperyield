@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
-import { writeContract } from "wagmi/actions";
+import { waitForTransactionReceipt, writeContract } from "wagmi/actions";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import type { AllocationDecision } from "~~/lib/ai/openai-agent";
 import { wagmiConfig } from "~~/services/web3/wagmiConfig";
@@ -126,8 +126,8 @@ const SuperYield: NextPage = () => {
       const depositTellerAddress = "0x2f245E60EE78Acb2847D8FE1336725307C7B38Df" as `0x${string}`;
 
       // Step 1: Approve USDC spending by DepositTeller
-      console.log("Approving USDC spending...");
-      await writeContract(wagmiConfig, {
+      console.log(`Approving ${amountInUSDC} USDC spending by ${depositTellerAddress}...`);
+      const approveTxHash = await writeContract(wagmiConfig, {
         address: usdcAddress,
         abi: [
           {
@@ -145,7 +145,21 @@ const SuperYield: NextPage = () => {
         args: [depositTellerAddress, amountInUSDC],
       });
 
-      console.log("USDC approved, now depositing...");
+      console.log("Approval transaction sent:", approveTxHash);
+      console.log("Waiting for approval confirmation...");
+
+      // Wait for approval transaction to be confirmed
+      const approvalReceipt = await waitForTransactionReceipt(wagmiConfig, {
+        hash: approveTxHash,
+      });
+
+      console.log("Approval confirmed:", approvalReceipt.status);
+
+      if (approvalReceipt.status !== "success") {
+        throw new Error("Approval transaction failed");
+      }
+
+      console.log("USDC approved successfully, now depositing...");
 
       // Step 2: Deposit to vault
       await depositToVault({
@@ -158,7 +172,8 @@ const SuperYield: NextPage = () => {
       alert(`Successfully deposited ${depositAmount} USDC to ${vaultName || "SuperYield Vault"}!`);
     } catch (error) {
       console.error("Deposit failed:", error);
-      alert(`Deposit failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
+      alert(`Deposit failed: ${errorMessage}`);
     } finally {
       setDepositLoading(false);
     }
